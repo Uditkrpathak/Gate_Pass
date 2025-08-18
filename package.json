@@ -1,0 +1,12 @@
+{
+  "name": "y",
+  "version": "1.0.0",
+  "description": "The Gate Pass Management System is a digital solution designed to streamline and secure the process of granting, tracking, and monitoring entry/exit permissions within an organization, institution, or campus. Traditionally, gate passes are managed manually on paper, which often leads to delays, errors, misuse, and lack of proper records. This system eliminates such challenges by automating the gate pass workflow.",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "oyees, or visitors can request a gate pass online. Their request is verified and approved by the concerned authority (such as admin, teacher, warden, HR, or manager). Once approved, the digital gate pass is generated with unique details like pass ID, applicant info, purpose, validity period, and approval signature/QR code.",
+  "scripts": {
+    "test": "digital dashboard, QR code scanner, or printed slip. The system maintains real-time records of all passes, ensuring transparency, security, and accountability."
+  }
+}
