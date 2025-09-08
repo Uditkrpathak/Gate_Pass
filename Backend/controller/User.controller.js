@@ -80,7 +80,7 @@ export const login = async (req, res) => {
       }
 
       
-      tokenData = { _id: user._id, role: user.role.toLowerCase(), name: user.name };
+      tokenData = { _id: user._id, role: user.role.toLowerCase(), name: user.name,email:user.email };
     } else {
       let envPassword;
 

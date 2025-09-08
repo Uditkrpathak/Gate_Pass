@@ -174,7 +174,7 @@ export const gatePassSecurity = async (req, res) => {
       });
     }
 
-    const formattedGatePasses = gatePasses.map((gp) => ({
+    const GatePasses = gatePasses.map((gp) => ({
       studentName: gp.studentId.name,
       rollNo: gp.studentId.rollNo,
       fromDate: gp.formDate,
@@ -186,9 +186,58 @@ export const gatePassSecurity = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      gatePasses: formattedGatePasses,
+      gatePasses: GatePasses,
     });
   } catch (error) {
     console.log(error);
   }
 };
+
+
+
+
+
+
+
+export const gatePassByRollNo = async (req, res) => {
+  try {
+    const email = req.user.email; 
+    console.log(email)
+
+  
+    const student = await User.findOne({ email });
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
+
+   
+    const gatePasses = await GatePass.find({ studentId: student._id })
+      .populate("studentId", "name rollNo email");
+
+    if (!gatePasses || gatePasses.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No leave applications found for this student",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      total: gatePasses.length,
+      gatePasses,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
