@@ -6,7 +6,7 @@ export const register = async (req, res) => {
   try {
     const { name, email, password, rollNo, role } = req.body;
 
-    if (!name || !email || !password || !rollNo || !role) {
+    if (!name || !email || !password || !rollNo || !role ) {
       return res.status(401).json({
         success: false,
         message: "All fields are required",

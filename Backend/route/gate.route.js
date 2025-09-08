@@ -6,6 +6,6 @@ const GateApply = express.Router()
 
 GateApply.post("/apply",isAuthenticated,authorize(["student"]),apply);
 GateApply.post("/approve/:id",isAuthenticated,authorize(["hod","warden"]),Approval);
-GateApply.get("/security/:id",isAuthenticated,authorize(["security"]),gatePassSecurity)
+GateApply.post("/security",isAuthenticated,authorize(["security"]),gatePassSecurity)
 
 export default GateApply

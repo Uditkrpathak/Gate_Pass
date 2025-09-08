@@ -1,10 +1,19 @@
 import { GatePass } from "../model/gate.model.js";
+import { User } from "../model/User.js";
 
 export const apply = async (req, res) => {
   try {
-    const { formDate, toDate, reason, workingDays } = req.body;
+    const { formDate, toDate, reason, workingDays, location, fatherContactNo } =
+      req.body;
 
-    if (!formDate || !toDate || !reason || !workingDays) {
+    if (
+      !formDate ||
+      !toDate ||
+      !reason ||
+      !workingDays ||
+      !location ||
+      !fatherContactNo
+    ) {
       return res.status(401).json({
         success: false,
         message: "All fields are required",
@@ -32,6 +41,8 @@ export const apply = async (req, res) => {
       reason,
       daysRequested,
       workingDays,
+      location,
+      fatherContactNo,
       status: "pending",
       approval: approvalStatus,
     });
@@ -57,7 +68,6 @@ export const Approval = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     const userRole = req.user.role.toLowerCase();
-    
 
     if (!["approved", "rejected"].includes(status)) {
       return res.status(400).json({
@@ -67,7 +77,6 @@ export const Approval = async (req, res) => {
     }
 
     let gatePass = await GatePass.findById(id);
-    
 
     if (!gatePass) {
       return res.status(404).json({
@@ -84,7 +93,7 @@ export const Approval = async (req, res) => {
         if (status === "rejected") {
           gatePass.status = "rejected";
         } else {
-          gatePass.status = "pending"; 
+          gatePass.status = "pending";
         }
       }
 
@@ -132,47 +141,54 @@ export const Approval = async (req, res) => {
   }
 };
 
-export const gatePassSecurity = async (req,res) => {
+export const gatePassSecurity = async (req, res) => {
   try {
+    const { rollNo } = req.body;
 
-    const {id} =  req.params;
-
-    let gatePass = await GatePass.findById(id);
-
-    if(!gatePass){
+    if (!rollNo) {
       return res.status(401).json({
-        success:false,
-        message:"Gate Pass not found"
-      })
-
+        success: false,
+        message: "Roll No required",
+      });
     }
 
-     gatePass =  await gatePass.populate("studentId", "name email rollNo");
+    const Student = await User.findOne({ rollNo });
 
-     const userRole = req.user.role.toLowerCase();
-
-     if(userRole==="security"){
-       return res.status(200).json({
-        success: true,
-        gatePass: {
-          studentName: gatePass.studentId.name,
-          rollNo: gatePass.studentId.rollNo,
-          daysRequested: gatePass.daysRequested,
-          status: gatePass.status,
-          wardenStatus: gatePass.approval.warden,
-        },
+    if (!Student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
       });
-     }
+    }
 
-     return res.status(200).json({
-      success:true,
-      gatePass
-     })
+    const gatePasses = await GatePass.find({ studentId: Student._id }).populate(
+      "studentId",
+      "name rollNo"
+    );
 
+    if (!gatePasses.length) {
+      return res.status(200).json({
+        success: true,
+        message: "No leave applied by this student",
+        gatePasses: [],
+      });
+    }
 
-    
+    const formattedGatePasses = gatePasses.map((gp) => ({
+      studentName: gp.studentId.name,
+      rollNo: gp.studentId.rollNo,
+      fromDate: gp.formDate,
+      toDate: gp.toDate,
+      daysRequested: gp.daysRequested,
+      status: gp.status,
+      wardenStatus: gp.approval.warden,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      gatePasses: formattedGatePasses,
+    });
   } catch (error) {
     console.log(error);
-    
   }
-}
+};

@@ -34,6 +34,18 @@ const gatePass = mongoose.Schema({
 
   },
 
+  location:{
+    type:String,
+    required:true
+
+  },
+
+  fatherContactNo:{
+    type:String,
+    required:true
+
+  },
+
   approval: {
     hod: {
       type: String,
