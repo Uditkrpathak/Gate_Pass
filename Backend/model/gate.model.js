@@ -1,0 +1,53 @@
+import mongoose from "mongoose";
+
+const gatePass = mongoose.Schema({
+  studentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref:"User",
+    required: true,
+  },
+  reason: {
+    type: String,
+    required: true,
+  },
+  formDate: {
+    type: Date,
+    required: true,
+  },
+  toDate: {
+    type: Date,
+    required: true,
+  },
+  daysRequested: {
+    type: Number,
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    
+  },
+
+  workingDays:{
+    type:String,
+    enum:["yes","no"]
+
+  },
+
+  approval: {
+    hod: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      date:Date
+    },
+
+    warden: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      date:Date
+    },
+  },
+});
+
+
+export const GatePass = mongoose.model("GatePass",gatePass);
