@@ -193,18 +193,11 @@ export const gatePassSecurity = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
 export const gatePassByRollNo = async (req, res) => {
   try {
-    const email = req.user.email; 
-    console.log(email)
+    const email = req.user.email;
+    console.log(email);
 
-  
     const student = await User.findOne({ email });
 
     if (!student) {
@@ -214,9 +207,10 @@ export const gatePassByRollNo = async (req, res) => {
       });
     }
 
-   
-    const gatePasses = await GatePass.find({ studentId: student._id })
-      .populate("studentId", "name rollNo email");
+    const gatePasses = await GatePass.find({ studentId: student._id }).populate(
+      "studentId",
+      "name rollNo email"
+    );
 
     if (!gatePasses || gatePasses.length === 0) {
       return res.status(404).json({
@@ -239,5 +233,48 @@ export const gatePassByRollNo = async (req, res) => {
   }
 };
 
+export const CurrentStatus = async (req,res) => {
+  try {
 
+    const studentId = req.user._id;
 
+    if(!studentId){
+      return res.status(401).json({
+        success:false,
+        message:"studentId not found"
+      })
+    }
+
+    const gatePass = await GatePass.findOne({studentId}).sort({createdAt: -1}).populate("studentId","name rollNo email");
+
+    if(!gatePass){
+      return res.status(401).json({
+        success:false,
+        message:"GatePass not found"
+      })
+    }
+
+    return res.status(201).json({
+       
+        name: gatePass.studentId.name,
+        email: gatePass.studentId.email,
+        rollNo: gatePass.studentId.rollNo,
+      
+       leaveId: gatePass._id,
+        fromDate: gatePass.fromDate,
+        toDate: gatePass.toDate,
+        reason: gatePass.reason,
+        hodStatus: gatePass.hodStatus || gatePass.approval?.hod,
+        wardenStatus: gatePass.wardenStatus || gatePass.approval?.warden
+    })
+    
+  } catch (error) {
+    console.log(error);
+
+    return res.status(401).json({
+      success:false,
+      message:error.message
+    })
+    
+  }
+}
