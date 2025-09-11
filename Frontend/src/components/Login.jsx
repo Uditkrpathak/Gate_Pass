@@ -56,18 +56,21 @@ const Login = () => {
 
       console.log(response);
       console.log(form);
+      if (response.status === 200) {
+        navigate("/"); // <-- Home page
+      }
     } catch (error) {
       console.log(error);
     }
   };
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-400">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-blue-400">
       <form
         onSubmit={handleSubmit}
-        className="flex items-center justify-center flex-col w-full max-w-lg mt-10 mb-10 mx-auto bg-gradient-to-r from-blue-400 to-blue-300 p-8 rounded-2xl shadow-lg"
+        className="flex flex-col items-center justify-center w-full max-w-lg p-8 mx-auto mt-10 mb-10 shadow-lg bg-gradient-to-r from-blue-400 to-blue-300 rounded-2xl"
       >
-        <div className="flex flex-col justify-center items-center">
-          <div className="w-28 h-28 flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-400 rounded-full shadow-md mb-3">
+        <div className="flex flex-col items-center justify-center">
+          <div className="flex items-center justify-center mb-3 rounded-full shadow-md w-28 h-28 bg-gradient-to-r from-blue-500 to-blue-400">
             <img
               src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png"
               alt="logo"
@@ -82,7 +85,7 @@ const Login = () => {
           </p>
         </div>
 
-        <div className="flex flex-col w-full mt-5 gap-5">
+        <div className="flex flex-col w-full gap-5 mt-5">
           <div className="flex flex-col gap-2">
             <label className="font-medium text-xl text-[#1f2937]">Email</label>
             <input
@@ -131,7 +134,7 @@ const Login = () => {
               </div>
 
               {open && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg z-10">
+                <div className="absolute left-0 right-0 z-10 mt-1 bg-white rounded-lg shadow-lg top-full">
                   {roles.map((role) => (
                     <div
                       key={role.value}

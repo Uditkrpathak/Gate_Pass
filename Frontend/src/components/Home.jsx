@@ -7,7 +7,7 @@ import Footer from "../pages/Footer";
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-blue-400 relative">
+    <div className="relative min-h-screen bg-gray-300">
       <Navbar />
 
       <HeroSection />
