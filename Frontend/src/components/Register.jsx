@@ -6,7 +6,7 @@ import { VscLock } from "react-icons/vsc";
 import { IoChevronDown } from "react-icons/io5";
 import { AuthContext } from "../context/UserContext";
 import axios from "axios"
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 
 const roles = [
   {
@@ -23,58 +23,89 @@ const roles = [
   { value: "Security", label: "Security", icon: <VscLock className="mr-2" /> },
 ];
 
-
 const Register = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const navigate = useNavigate();
 
-  const [form,setForm] = useState({
+  const [form, setForm] = useState({
     name: "",
-    email:"",
-    password:"",
-    rollNo:"",
-    role:""
+    email: "",
+    password: "",
+    rollNo: "",
+    role: ""
+  });
 
-  })
-
-  const {serveUrl} = useContext(AuthContext);
+  const { serveUrl } = useContext(AuthContext);
 
   const handleChange = (e) => {
-    const {name,value} = e.target
+    const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]:value
-    }))
-  }
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();   // ✅ correct
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setSuccess("");
 
     try {
-
       const response = await axios.post(
         `${serveUrl}/api/v1/register`,
         form,
-        {withCredentials:true}
-      )
+        { withCredentials: true }
+      );
 
       console.log(response);
       console.log(form);
 
-      
+      // Handle successful registration
+      if (response.status === 200 || response.status === 201) {
+        setSuccess("Registration successful! Redirecting to login...");
+
+        // Option 1: Redirect to login page after a short delay
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+
+        // Option 2: Immediate redirect (uncomment if you prefer)
+        // navigate("/login");
+
+        // Option 3: Redirect to dashboard if auto-login happens
+        // navigate("/dashboard");
+      }
+
     } catch (error) {
-      console.log(error)
-      
+      console.log(error);
+
+      // Handle registration errors
+      if (error.response) {
+        // Server responded with error status
+        setError(error.response.data.message || "Registration failed. Please try again.");
+      } else if (error.request) {
+        // Network error
+        setError("Network error. Please check your connection and try again.");
+      } else {
+        // Other error
+        setError("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-400">
-      <form onSubmit={handleSubmit} className="flex items-center justify-center flex-col w-full max-w-lg mt-10 mb-10 mx-auto bg-gradient-to-r from-blue-400 to-blue-300 p-8 rounded-2xl shadow-lg">
-        <div className="flex flex-col justify-center items-center">
-          <div className="w-28 h-28 flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-400 rounded-full shadow-md mb-3">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-blue-400">
+      <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center w-full max-w-lg p-8 mx-auto mt-10 mb-10 shadow-lg bg-gradient-to-r from-blue-400 to-blue-300 rounded-2xl">
+        <div className="flex flex-col items-center justify-center">
+          <div className="flex items-center justify-center mb-3 rounded-full shadow-md w-28 h-28 bg-gradient-to-r from-blue-500 to-blue-400">
             <img
               src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png"
               alt="logo"
@@ -85,11 +116,24 @@ const Register = () => {
             Gate Pass System
           </h2>
           <p className="text-[#65758B] text-xl">
-            Sign in to access your dashboard
+            Create your account
           </p>
         </div>
 
-        <div className="flex flex-col w-full mt-5 gap-5">
+        {/* Success/Error Messages */}
+        {error && (
+          <div className="w-full p-3 mt-4 text-red-700 bg-red-100 border border-red-400 rounded-md">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="w-full p-3 mt-4 text-green-700 bg-green-100 border border-green-400 rounded-md">
+            {success}
+          </div>
+        )}
+
+        <div className="flex flex-col w-full gap-5 mt-5">
           <div className="flex flex-col gap-2">
             <label className="font-medium text-xl text-[#1f2937]">
               Full Name
@@ -101,6 +145,7 @@ const Register = () => {
               className="p-3 rounded-md bg-[#FFFF00] outline-none placeholder:text-[18px]"
               value={form.name}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -113,6 +158,7 @@ const Register = () => {
               className="p-3 rounded-md bg-[#FFFF00] outline-none placeholder:text-[18px]"
               value={form.email}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -127,6 +173,7 @@ const Register = () => {
               className="p-3 rounded-md bg-[#FFFF00] outline-none placeholder:text-[18px]"
               value={form.password}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -141,10 +188,10 @@ const Register = () => {
               className="p-3 rounded-md bg-[#FFFF00] outline-none placeholder:text-[18px]"
               value={form.rollNo}
               onChange={handleChange}
+              required
             />
           </div>
 
-          {/* ✅ Corrected Role Dropdown with React Icons */}
           <div className="flex flex-col gap-2">
             <label className="font-medium text-xl text-[#1f2937]">Role</label>
             <div className="relative">
@@ -166,14 +213,13 @@ const Register = () => {
               </div>
 
               {open && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg z-10">
+                <div className="absolute left-0 right-0 z-10 mt-1 bg-white rounded-lg shadow-lg top-full">
                   {roles.map((role) => (
                     <div
                       key={role.value}
                       onClick={() => {
                         setSelectedRole(role);
                         setForm((prev) => ({ ...prev, role: role.value }));
-
                         setOpen(false);
                       }}
                       className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100"
@@ -187,12 +233,24 @@ const Register = () => {
             </div>
           </div>
         </div>
-        <button className="w-full mt-7 p-3 flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-400 rounded-md text-[#FFFFFF] font-bold text-[16px]">
-          Sign In
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full mt-7 p-3 flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-400 rounded-md text-[#FFFFFF] font-bold text-[16px] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Registering..." : "Sign Up"}
         </button>
+
         <div className="mt-4">
           <p className="text-[#65758B] font-medium">
-            Already have an account ? <span onClick={() => navigate("/login")} className="underline cursor-pointer">Please Login</span>
+            Already have an account? {" "}
+            <span
+              onClick={() => navigate("/login")}
+              className="text-blue-700 underline cursor-pointer hover:text-blue-800"
+            >
+              Please Login
+            </span>
           </p>
         </div>
       </form>

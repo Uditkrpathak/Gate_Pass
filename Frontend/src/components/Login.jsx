@@ -47,7 +47,7 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // ✅ correct
+    e.preventDefault();
 
     try {
       const response = await axios.post(`${serveUrl}/api/v1/login`, form, {
