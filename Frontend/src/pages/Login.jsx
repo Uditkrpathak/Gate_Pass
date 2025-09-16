@@ -7,56 +7,53 @@ import { IoChevronDown } from "react-icons/io5";
 import { AuthContext } from "../context/UserContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const roles = [
-  {
-    value: "Student",
-    label: "Student",
-    icon: <RiGraduationCapLine className="mr-2" />,
-  },
+  { value: "Student", label: "Student", icon: <RiGraduationCapLine className="mr-2" /> },
   { value: "HOD", label: "HOD", icon: <BiUserCheck className="mr-2" /> },
-  {
-    value: "Warden",
-    label: "Warden",
-    icon: <MdOutlineShield className="mr-2" />,
-  },
+  { value: "Warden", label: "Warden", icon: <MdOutlineShield className="mr-2" /> },
   { value: "Security", label: "Security", icon: <VscLock className="mr-2" /> },
 ];
 
 const Login = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [open, setOpen] = useState(false);
-
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    role: "",
-  });
-
+  const [form, setForm] = useState({ email: "", password: "", role: "" });
   const { serveUrl } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!form.role) {
+      toast.error("Please select your role!", { theme: "colored" });
+      return;
+    }
+
     try {
-      const response = await axios.post(`${serveUrl}/api/v1/login`, form, {
-        withCredentials: true,
-      });
+      const response = await axios.post(`${serveUrl}/api/v1/login`, form, { withCredentials: true });
 
       if (response.status === 200) {
-        navigate("/"); // Home page
+        toast.success("Login successful!", { theme: "colored" });
+
+        // Navigate to Home page after short delay so toast is visible
+        setTimeout(() => navigate("/"), 1000);
       }
     } catch (error) {
-      console.log(error);
+      if (error.response) {
+        toast.error(error.response.data?.message || "Invalid credentials", { theme: "colored" });
+      } else if (error.request) {
+        toast.error("Network error. Please try again.", { theme: "colored" });
+      } else {
+        toast.error("An unexpected error occurred.", { theme: "colored" });
+      }
     }
   };
 
@@ -75,12 +72,8 @@ const Login = () => {
               className="w-16 h-16"
             />
           </div>
-          <h2 className="text-3xl text-[#1f2937] font-bold mb-2">
-            Gate Pass System
-          </h2>
-          <p className="text-[#65758B] text-xl">
-            Sign in to access your dashboard
-          </p>
+          <h2 className="text-3xl text-[#1f2937] font-bold mb-2">Gate Pass System</h2>
+          <p className="text-[#65758B] text-xl">Sign in to access your dashboard</p>
         </div>
 
         {/* Form Fields */}
@@ -94,13 +87,12 @@ const Login = () => {
               className="p-3 rounded-md bg-[#FFF2CC] outline-none placeholder:text-[18px]"
               value={form.email}
               onChange={handleChange}
+              required
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="font-medium text-xl text-[#1f2937]">
-              Password
-            </label>
+            <label className="font-medium text-xl text-[#1f2937]">Password</label>
             <input
               type="password"
               name="password"
@@ -108,6 +100,7 @@ const Login = () => {
               className="p-3 rounded-md bg-[#FFF2CC] outline-none placeholder:text-[18px]"
               value={form.password}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -155,7 +148,10 @@ const Login = () => {
         </div>
 
         {/* Submit Button */}
-        <button className="w-full mt-7 p-3 flex items-center justify-center bg-gradient-to-r from-orange-500 to-orange-400 rounded-md text-white font-bold text-[16px] hover:opacity-90 transition">
+        <button
+          type="submit"
+          className="w-full mt-7 p-3 flex items-center justify-center bg-gradient-to-r from-orange-500 to-orange-400 rounded-md text-white font-bold text-[16px] hover:opacity-90 transition"
+        >
           Sign In
         </button>
 
@@ -172,6 +168,9 @@ const Login = () => {
           </p>
         </div>
       </form>
+
+      {/* Toast Container */}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

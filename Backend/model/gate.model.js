@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const gatePass = mongoose.Schema({
+const gatePassSchema = mongoose.Schema({
   studentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref:"User",
@@ -50,16 +50,20 @@ const gatePass = mongoose.Schema({
     hod: {
       type: String,
       enum: ["pending", "approved", "rejected"],
-      date:Date
+    },
+    hodDate: {
+      type: Date,
     },
 
     warden: {
       type: String,
       enum: ["pending", "approved", "rejected"],
-      date:Date
     },
+    wardenDate: {
+      type: Date,
+    }
   },
-});
+}, { timestamps: true });
 
 
-export const GatePass = mongoose.model("GatePass",gatePass);
+export const GatePass = mongoose.model("GatePass", gatePassSchema);

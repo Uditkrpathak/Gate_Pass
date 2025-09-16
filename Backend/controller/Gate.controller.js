@@ -14,7 +14,7 @@ export const apply = async (req, res) => {
       !location ||
       !fatherContactNo
     ) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
         message: "All fields are required",
       });
@@ -26,14 +26,8 @@ export const apply = async (req, res) => {
 
     let approvalStatus = {};
 
-    if (workingDays === "yes") {
-      approvalStatus.hod = "pending";
-      approvalStatus.warden = "pending";
-    } else {
-      approvalStatus.hod = "pending";
-      approvalStatus.warden = "pending";
-    }
-
+    approvalStatus.hod = "pending";
+    approvalStatus.warden = "pending";
     let gatePass = await GatePass.create({
       studentId: req.user._id,
       formDate,
@@ -121,7 +115,7 @@ export const Approval = async (req, res) => {
       gatePass.approval.warden = status;
       gatePass.approval.wardenDate = new Date();
 
-      gatePass.status = status === "approved" ? "approved" : "rejected";
+      gatePass.status = status;
     }
 
     await gatePass.save();
@@ -190,6 +184,10 @@ export const gatePassSecurity = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -213,7 +211,7 @@ export const gatePassByRollNo = async (req, res) => {
     );
 
     if (!gatePasses || gatePasses.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         success: false,
         message: "No leave applications found for this student",
       });
@@ -239,28 +237,28 @@ export const CurrentStatus = async (req,res) => {
     const studentId = req.user._id;
 
     if(!studentId){
-      return res.status(401).json({
+      return res.status(400).json({
         success:false,
         message:"studentId not found"
       })
     }
 
-    const gatePass = await GatePass.findOne({studentId}).sort({createdAt: -1}).populate("studentId","name rollNo email");
+    const gatePass = await GatePass.findOne({studentId}).sort({ createdAt: -1 }).populate("studentId","name rollNo email");
 
     if(!gatePass){
-      return res.status(401).json({
+      return res.status(404).json({
         success:false,
         message:"GatePass not found"
       })
     }
 
-    return res.status(201).json({
+    return res.status(200).json({
        
         name: gatePass.studentId.name,
         email: gatePass.studentId.email,
         rollNo: gatePass.studentId.rollNo,
       
-       leaveId: gatePass._id,
+        leaveId: gatePass._id,
         fromDate: gatePass.fromDate,
         toDate: gatePass.toDate,
         reason: gatePass.reason,
@@ -271,7 +269,7 @@ export const CurrentStatus = async (req,res) => {
   } catch (error) {
     console.log(error);
 
-    return res.status(401).json({
+    return res.status(500).json({
       success:false,
       message:error.message
     })
