@@ -6,7 +6,7 @@ import { VscLock } from "react-icons/vsc";
 import { IoChevronDown } from "react-icons/io5";
 import { AuthContext } from "../context/UserContext";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 
 const roles = [
   {
@@ -30,12 +30,10 @@ const Login = () => {
   const [form, setForm] = useState({
     email: "",
     password: "",
-
     role: "",
   });
 
   const { serveUrl } = useContext(AuthContext);
-
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -54,23 +52,23 @@ const Login = () => {
         withCredentials: true,
       });
 
-      console.log(response);
-      console.log(form);
       if (response.status === 200) {
-        navigate("/"); // <-- Home page
+        navigate("/"); // Home page
       }
     } catch (error) {
       console.log(error);
     }
   };
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-blue-400">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-orange-400 to-orange-300">
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col items-center justify-center w-full max-w-lg p-8 mx-auto mt-10 mb-10 shadow-lg bg-gradient-to-r from-blue-400 to-blue-300 rounded-2xl"
+        className="flex flex-col items-center justify-center w-full max-w-lg p-8 mx-auto mt-10 mb-10 shadow-lg bg-gradient-to-r from-orange-300 to-orange-200 rounded-2xl"
       >
+        {/* Logo + Heading */}
         <div className="flex flex-col items-center justify-center">
-          <div className="flex items-center justify-center mb-3 rounded-full shadow-md w-28 h-28 bg-gradient-to-r from-blue-500 to-blue-400">
+          <div className="flex items-center justify-center mb-3 rounded-full shadow-md w-28 h-28 bg-gradient-to-r from-orange-500 to-orange-400">
             <img
               src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png"
               alt="logo"
@@ -85,6 +83,7 @@ const Login = () => {
           </p>
         </div>
 
+        {/* Form Fields */}
         <div className="flex flex-col w-full gap-5 mt-5">
           <div className="flex flex-col gap-2">
             <label className="font-medium text-xl text-[#1f2937]">Email</label>
@@ -92,7 +91,7 @@ const Login = () => {
               type="email"
               name="email"
               placeholder="Enter your Email"
-              className="p-3 rounded-md bg-[#FFFF00] outline-none placeholder:text-[18px]"
+              className="p-3 rounded-md bg-[#FFF2CC] outline-none placeholder:text-[18px]"
               value={form.email}
               onChange={handleChange}
             />
@@ -106,19 +105,19 @@ const Login = () => {
               type="password"
               name="password"
               placeholder="Enter your Password"
-              className="p-3 rounded-md bg-[#FFFF00] outline-none placeholder:text-[18px]"
+              className="p-3 rounded-md bg-[#FFF2CC] outline-none placeholder:text-[18px]"
               value={form.password}
               onChange={handleChange}
             />
           </div>
 
-          {/* ✅ Corrected Role Dropdown with React Icons */}
+          {/* Role Dropdown */}
           <div className="flex flex-col gap-2">
             <label className="font-medium text-xl text-[#1f2937]">Role</label>
             <div className="relative">
               <div
                 onClick={() => setOpen(!open)}
-                className="p-3 bg-[#FFFF00] rounded-md flex justify-between items-center cursor-pointer"
+                className="p-3 bg-[#FFF2CC] rounded-md flex justify-between items-center cursor-pointer"
               >
                 <span className="flex items-center text-gray-800">
                   {selectedRole ? (
@@ -141,10 +140,9 @@ const Login = () => {
                       onClick={() => {
                         setSelectedRole(role);
                         setForm((prev) => ({ ...prev, role: role.value }));
-
                         setOpen(false);
                       }}
-                      className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100"
+                      className="flex items-center px-4 py-2 cursor-pointer hover:bg-orange-100"
                     >
                       {role.icon}
                       {role.label}
@@ -155,12 +153,22 @@ const Login = () => {
             </div>
           </div>
         </div>
-        <button className="w-full mt-7 p-3 flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-400 rounded-md text-[#FFFFFF] font-bold text-[16px]">
+
+        {/* Submit Button */}
+        <button className="w-full mt-7 p-3 flex items-center justify-center bg-gradient-to-r from-orange-500 to-orange-400 rounded-md text-white font-bold text-[16px] hover:opacity-90 transition">
           Sign In
         </button>
+
+        {/* Register Link */}
         <div className="mt-4">
           <p className="text-[#65758B] font-medium">
-            Don't have an account ? <span onClick={() => navigate("/register")} className="underline cursor-pointer">Register</span>
+            Don't have an account?{" "}
+            <span
+              onClick={() => navigate("/register")}
+              className="underline cursor-pointer text-[#FE6019]"
+            >
+              Register
+            </span>
           </p>
         </div>
       </form>
