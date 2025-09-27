@@ -31,21 +31,33 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (!form.role) {
       toast.error("Please select your role!", { theme: "colored" });
       return;
     }
-
+    
     try {
       const response = await axios.post(`${serveUrl}/api/v1/login`, form, { withCredentials: true });
+      console.log(response)
+      
+      // if (response.status === 200) {
+      //   toast.success("Login successful!", { theme: "colored" });
+        
+      //   // Navigate to Home page after short delay so toast is visible
+      //   setTimeout(() => navigate("/"), 1000);
+      // }
 
-      if (response.status === 200) {
+      try{
+        if (response.status === 201) {
         toast.success("Login successful!", { theme: "colored" });
-
-        // Navigate to Home page after short delay so toast is visible
-        setTimeout(() => navigate("/"), 1000);
+        console.log("User Login")
+        navigate("/");
       }
+      }catch(err){
+        console.log(err)
+      }
+
     } catch (error) {
       if (error.response) {
         toast.error(error.response.data?.message || "Invalid credentials", { theme: "colored" });
