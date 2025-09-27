@@ -39,7 +39,8 @@ const Login = () => {
     
     try {
       const response = await axios.post(`${serveUrl}/api/v1/login`, form, { withCredentials: true });
-      console.log(response)
+
+      
       
       // if (response.status === 200) {
       //   toast.success("Login successful!", { theme: "colored" });
@@ -50,6 +51,18 @@ const Login = () => {
 
       try{
         if (response.status === 201) {
+          if(form.role === 'student'){
+            navigate('/student')
+          }
+          if(form.role === 'hod'){
+            navigate('/hod')
+          }
+          if(form.role === 'admin'){
+            navigate('/admin')
+          }
+          if(form.role === 'warden'){
+            navigate('/warden')
+          }
         toast.success("Login successful!", { theme: "colored" });
         console.log("User Login")
         navigate("/");
