@@ -59,9 +59,9 @@ export const login = async (req, res) => {
 
     let tokenData;
 
+    const user = await User.findOne({ email });
     
     if (role.toLowerCase() === "student") {
-      const user = await User.findOne({ email });
 
       if (!user) {
         return res.status(401).json({
@@ -103,7 +103,7 @@ export const login = async (req, res) => {
         return res.status(401).json({
           success: false,
           message: "Password does not match",
-        });
+        });   
       }
 
       tokenData = { _id: email, role:role.toLowerCase() };
@@ -113,6 +113,9 @@ export const login = async (req, res) => {
       expiresIn: "1d",
     });
 
+    const userData = user.toObject();
+    delete userData.password;
+
     return res
       .status(201)
       .cookie("token", token, {
@@ -120,6 +123,7 @@ export const login = async (req, res) => {
         httpOnly: true,
       })
       .json({
+        userData,
         success: true,
         message: "Login Successfully",
         token,

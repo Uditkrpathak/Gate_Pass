@@ -22,7 +22,7 @@ const App = () => {
         <Route
         path="/student"
         element={
-          <ProtectedRoute allowedRole="Student">
+          <ProtectedRoute allowedRole="student">
             <StudentDashboard/>
           </ProtectedRoute>
         }
@@ -31,7 +31,7 @@ const App = () => {
       <Route
         path="/hod"
         element={
-          <ProtectedRoute allowedRole="HOD">
+          <ProtectedRoute allowedRole="hod">
             <Hod/>
           </ProtectedRoute>
         }
@@ -40,7 +40,7 @@ const App = () => {
       <Route
         path="/warden"
         element={
-          <ProtectedRoute allowedRole="Warden">
+          <ProtectedRoute allowedRole="warden">
             <WardenDashboard/>
           </ProtectedRoute>
         }
@@ -49,7 +49,7 @@ const App = () => {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute allowedRole="Admin">
+          <ProtectedRoute allowedRole="admin">
             <AdminDashboard/>
           </ProtectedRoute>
         }

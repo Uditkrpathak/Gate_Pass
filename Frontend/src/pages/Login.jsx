@@ -48,27 +48,24 @@ const Login = () => {
       //   // Navigate to Home page after short delay so toast is visible
       //   setTimeout(() => navigate("/"), 1000);
       // }
-
-      try{
-        if (response.status === 201) {
-          if(form.role === 'student'){
+    
+      localStorage.setItem('user',JSON.stringify(response.data.userData));
+      if (response.status === 201) {
+          if(form.role === 'Student'){
             navigate('/student')
           }
-          if(form.role === 'hod'){
+          if(form.role === 'HOD'){
             navigate('/hod')
           }
           if(form.role === 'admin'){
             navigate('/admin')
           }
-          if(form.role === 'warden'){
+          if(form.role === 'Warden'){
             navigate('/warden')
           }
-        toast.success("Login successful!", { theme: "colored" });
-        console.log("User Login")
-        navigate("/");
-      }
-      }catch(err){
-        console.log(err)
+        // toast.success("Login successful!", { theme: "colored" });
+        // console.log("User Login")
+        // navigate("/");
       }
 
     } catch (error) {
