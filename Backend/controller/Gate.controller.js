@@ -1,62 +1,61 @@
+
+import { Department } from "../model/department.js";
 import { GatePass } from "../model/gate.model.js";
 import { User } from "../model/User.js";
 
+
+
 export const apply = async (req, res) => {
   try {
-    const { formDate, toDate, reason, workingDays, location, fatherContactNo } =
-      req.body;
+    const { formDate, toDate, reason, workingDays, location, fatherContactNo, depart_Name } = req.body;
 
-    if (
-      !formDate ||
-      !toDate ||
-      !reason ||
-      !workingDays ||
-      !location ||
-      !fatherContactNo
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
+    if (!formDate || !toDate || !reason || !workingDays || !location || !fatherContactNo || !depart_Name) {
+      return res.status(400).json({ success: false, message: "All fields are required" });
+    }
+
+    const departmentData = await Department.findOne({ depart_Name });
+
+    if (!departmentData) {
+      return res.status(404).json({ success: false, message: "Department not found" });
     }
 
     const daysRequested = Math.floor(
       (new Date(toDate) - new Date(formDate)) / (1000 * 60 * 60 * 24) + 1
     );
 
-    let approvalStatus = {};
+  let gatePass = await GatePass.create({
+  studentId: req.user._id,
+  formDate,
+  toDate,
+  reason,
+  daysRequested,
+  workingDays,
+  location,
+  fatherContactNo,
+  department: departmentData._id,
+  status: "pending",
+  approval: { hod: "pending", warden: "pending" }
+});
 
-    approvalStatus.hod = "pending";
-    approvalStatus.warden = "pending";
-    let gatePass = await GatePass.create({
-      studentId: req.user._id,
-      formDate,
-      toDate,
-      reason,
-      daysRequested,
-      workingDays,
-      location,
-      fatherContactNo,
-      status: "pending",
-      approval: approvalStatus,
-    });
+gatePass = await GatePass.findById(gatePass._id)
+  .populate("studentId", "name email rollNo")
+  .populate("department", "depart_Name");
 
-    gatePass = await gatePass.populate("studentId", "name email rollNo");
 
     return res.status(201).json({
       success: true,
-      message: "Leave Applied Successfully",
-      gatePass,
+      message: "Gate Pass Applied Successfully",
+      gatePass
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
+
+
+// ✅ Approve / Reject by HOD or Warden
 export const Approval = async (req, res) => {
   try {
     const { id } = req.params;
@@ -64,62 +63,73 @@ export const Approval = async (req, res) => {
     const userRole = req.user.role.toLowerCase();
 
     if (!["approved", "rejected"].includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: "Status must be either approved or rejected",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Status must be either approved or rejected",
+        });
     }
 
-    let gatePass = await GatePass.findById(id);
-
+    let gatePass = await GatePass.findById(id).populate(
+      "studentId",
+      "name email rollNo department"
+    );
     if (!gatePass) {
-      return res.status(404).json({
-        success: false,
-        message: "Gate Pass not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Gate Pass not found" });
     }
 
+    // ✅ If working days -> HOD first, then Warden
     if (gatePass.workingDays === "yes") {
       if (userRole === "hod") {
-        gatePass.approval.hod = status;
-        gatePass.approval.hodDate = new Date();
-
-        if (status === "rejected") {
-          gatePass.status = "rejected";
-        } else {
-          gatePass.status = "pending";
+        const hod = await User.findById(req.user._id);
+        if (
+          !hod.department ||
+          String(hod.department) !== String(gatePass.department)
+        ) {
+          return res.status(403).json({
+            success: false,
+            message: "HOD can only approve students from their own department",
+          });
         }
       }
 
       if (userRole === "warden") {
         if (gatePass.approval.hod !== "approved") {
-          return res.status(403).json({
-            success: false,
-            message: "Warden can approve only after HOD approval",
-          });
+          return res
+            .status(403)
+            .json({
+              success: false,
+              message: "Warden can approve only after HOD approval",
+            });
         }
-
         gatePass.approval.warden = status;
         gatePass.approval.wardenDate = new Date();
-
         gatePass.status = status === "rejected" ? "rejected" : "approved";
       }
-    } else {
+    }
+    // ✅ If non-working days -> Only Warden
+    else {
       if (userRole !== "warden") {
-        return res.status(403).json({
-          success: false,
-          message: "Only Warden can approve on non-working days",
-        });
+        return res
+          .status(403)
+          .json({
+            success: false,
+            message: "Only Warden can approve on non-working days",
+          });
       }
-
       gatePass.approval.warden = status;
       gatePass.approval.wardenDate = new Date();
-
       gatePass.status = status;
     }
 
     await gatePass.save();
-    gatePass = await gatePass.populate("studentId", "name email rollNo");
+    gatePass = await gatePass.populate(
+      "studentId",
+      "name email rollNo department"
+    );
 
     return res.status(200).json({
       success: true,
@@ -128,32 +138,25 @@ export const Approval = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// ✅ Security checks student’s gate pass by rollNo
 export const gatePassSecurity = async (req, res) => {
   try {
     const { rollNo } = req.body;
 
-    if (!rollNo) {
-      return res.status(401).json({
-        success: false,
-        message: "Roll No required",
-      });
-    }
+    if (!rollNo)
+      return res
+        .status(400)
+        .json({ success: false, message: "Roll No required" });
 
     const Student = await User.findOne({ rollNo });
-
-    if (!Student) {
-      return res.status(404).json({
-        success: false,
-        message: "Student not found",
-      });
-    }
+    if (!Student)
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
 
     const gatePasses = await GatePass.find({ studentId: Student._id }).populate(
       "studentId",
@@ -161,11 +164,13 @@ export const gatePassSecurity = async (req, res) => {
     );
 
     if (!gatePasses.length) {
-      return res.status(200).json({
-        success: true,
-        message: "No leave applied by this student",
-        gatePasses: [],
-      });
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "No leave applied by this student",
+          gatePasses: [],
+        });
     }
 
     const GatePasses = gatePasses.map((gp) => ({
@@ -178,101 +183,73 @@ export const gatePassSecurity = async (req, res) => {
       wardenStatus: gp.approval.warden,
     }));
 
-    return res.status(200).json({
-      success: true,
-      gatePasses: GatePasses,
-    });
+    return res.status(200).json({ success: true, gatePasses: GatePasses });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// ✅ Student fetches all their gate passes
 export const gatePassByRollNo = async (req, res) => {
   try {
-    const email = req.user.email;
-    console.log(email);
-
-    const student = await User.findOne({ email });
-
-    if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: "Student not found",
-      });
-    }
+    const student = await User.findOne({ email: req.user.email });
+    if (!student)
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
 
     const gatePasses = await GatePass.find({ studentId: student._id }).populate(
       "studentId",
       "name rollNo email"
     );
 
-    if (!gatePasses || gatePasses.length === 0) {
-      return res.status(200).json({
-        success: false,
-        message: "No leave applications found for this student",
-      });
+    if (!gatePasses.length) {
+      return res
+        .status(200)
+        .json({
+          success: false,
+          message: "No leave applications found for this student",
+        });
     }
 
-    return res.status(200).json({
-      success: true,
-      total: gatePasses.length,
-      gatePasses,
-    });
+    return res
+      .status(200)
+      .json({ success: true, total: gatePasses.length, gatePasses });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-export const CurrentStatus = async (req,res) => {
+// ✅ Student’s most recent GatePass status
+export const CurrentStatus = async (req, res) => {
   try {
-
     const studentId = req.user._id;
 
-    if(!studentId){
-      return res.status(400).json({
-        success:false,
-        message:"studentId not found"
-      })
-    }
+    const gatePass = await GatePass.findOne({ studentId })
+      .sort({ createdAt: -1 })
+      .populate("studentId", "name rollNo email");
 
-    const gatePass = await GatePass.findOne({studentId}).sort({ createdAt: -1 }).populate("studentId","name rollNo email");
-
-    if(!gatePass){
-      return res.status(404).json({
-        success:false,
-        message:"GatePass not found"
-      })
+    if (!gatePass) {
+      return res
+        .status(404)
+        .json({ success: false, message: "GatePass not found" });
     }
 
     return res.status(200).json({
-       
-        name: gatePass.studentId.name,
-        email: gatePass.studentId.email,
-        rollNo: gatePass.studentId.rollNo,
-      
-        leaveId: gatePass._id,
-        fromDate: gatePass.fromDate,
-        toDate: gatePass.toDate,
-        reason: gatePass.reason,
-        hodStatus: gatePass.hodStatus || gatePass.approval?.hod,
-        wardenStatus: gatePass.wardenStatus || gatePass.approval?.warden
-    })
-    
+      name: gatePass.studentId.name,
+      email: gatePass.studentId.email,
+      rollNo: gatePass.studentId.rollNo,
+      leaveId: gatePass._id,
+      fromDate: gatePass.formDate,
+      toDate: gatePass.toDate,
+      reason: gatePass.reason,
+      hodStatus: gatePass.approval.hod,
+      wardenStatus: gatePass.approval.warden,
+    });
   } catch (error) {
     console.log(error);
-
-    return res.status(500).json({
-      success:false,
-      message:error.message
-    })
-    
+    return res.status(500).json({ success: false, message: error.message });
   }
-}
+};
