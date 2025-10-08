@@ -25,6 +25,10 @@ app.use(
 
 app.use(cookieParser())
 
+app.get('/',(req,res)=>{
+    res.json({messag:"Api is working"});
+})
+
 
 app.use("/api/v1",Userrouter);
 app.use("/api/v2",GateApply)
