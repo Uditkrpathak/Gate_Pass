@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useAuth } from "../context/UserContext";
 import toast, { Toaster } from "react-hot-toast";
+import Cookies from 'js-cookie';
 
 const ApplyLeave = () => {
   const [formData, setFormData] = useState({
@@ -12,12 +12,14 @@ const ApplyLeave = () => {
     location: "",
     fatherContactNo: "",
   });
-  const [authUser] = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    const token = Cookies.get('token');
+    console.log(token);
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,7 +35,7 @@ const ApplyLeave = () => {
       // Ensure you have a proxy set up in your vite.config.js or use the full URL
       const res = await axios.post("/api/gate/apply", formData, {
         headers: {
-          Authorization: `Bearer ${authUser.token}`,
+          Authorization: `Bearer `,
         },
         withCredentials: true,
       });

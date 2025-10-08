@@ -48,11 +48,11 @@ const Login = () => {
       //   // Navigate to Home page after short delay so toast is visible
       //   setTimeout(() => navigate("/"), 1000);
       // }
-    
+      localStorage.setItem('token',response.data.token);
       localStorage.setItem('user',JSON.stringify(response.data.userData));
       if (response.status === 201) {
           if(form.role === 'Student'){
-            navigate('/student')
+            navigate('/student/dashboard')
           }
           if(form.role === 'HOD'){
             navigate('/hod')
