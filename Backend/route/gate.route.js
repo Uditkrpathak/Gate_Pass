@@ -1,13 +1,14 @@
-import express from "express"
-import { apply, Approval, CurrentStatus, gatePassByRollNo, gatePassSecurity } from "../controller/Gate.controller.js"
+import express from "express";
+import { apply , Approval , gatePassSecurity , gatePassByRollNo , CurrentStatus} from "../controller/Gate.controller.js";
 import { authorize, isAuthenticated } from "../middleware/auth.js";
 
-const GateApply = express.Router()
 
-GateApply.post("/apply",isAuthenticated,authorize(["student"]),apply);
-GateApply.post("/approve/:id",isAuthenticated,authorize(["hod","warden"]),Approval);
-GateApply.post("/security",isAuthenticated,authorize(["security"]),gatePassSecurity)
-GateApply.get("/getAll",isAuthenticated,authorize(["student"]),gatePassByRollNo);
-GateApply.get("/currentStatus",isAuthenticated,authorize(["student"]),CurrentStatus)
+const GateApply = express.Router();
 
-export default GateApply
+GateApply.post("/apply", isAuthenticated, authorize(["student"]), apply);
+GateApply.post("/approve/:id", isAuthenticated, authorize(["hod", "warden"]), Approval);
+GateApply.post("/security", isAuthenticated, authorize(["security"]), gatePassSecurity);
+GateApply.get("/getAll", isAuthenticated, authorize(["student"]), gatePassByRollNo);
+GateApply.get("/currentStatus", isAuthenticated, authorize(["student"]), CurrentStatus);
+
+export default GateApply;
