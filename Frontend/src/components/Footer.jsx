@@ -15,7 +15,7 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Company */}
+        
           <div>
             <h4 className="mb-4 text-base font-semibold">Company</h4>
             <ul className="space-y-2 text-sm">

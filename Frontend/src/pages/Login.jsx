@@ -54,10 +54,10 @@ const Login = () => {
           if(form.role === 'Student'){
             navigate('/student/dashboard')
           }
-          if(form.role === 'HOD'){
+          if(form.role === 'Hod'){
             navigate('/hod')
           }
-          if(form.role === 'admin'){
+          if(form.role === 'Admin'){
             navigate('/admin')
           }
           if(form.role === 'Warden'){

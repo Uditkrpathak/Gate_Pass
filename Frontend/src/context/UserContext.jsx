@@ -1,9 +1,6 @@
 import { createContext } from "react";
 
-
-
 export const AuthContext = createContext();
-
 
 function AuthProvider({children}) {
     const serveUrl = "http://localhost:3000"
