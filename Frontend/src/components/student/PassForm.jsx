@@ -1,14 +1,15 @@
-import axios from 'axios';
-import { useState } from 'react';
+import axios from "axios";
+import { useState } from "react";
 
 const GatePassForm = () => {
   const [formData, setFormData] = useState({
-    reason: '',
-    formDate: '',
-    toDate: '',
-    workingDays: 'yes',
-    location: '',
-    fatherContactNo: '',
+    reason: "",
+    formDate: "",
+    toDate: "",
+    workingDays: "yes",
+    location: "",
+    fatherContactNo: "",
+    depart_Name: "", // now a text input
   });
 
   const handleChange = (e) => {
@@ -23,41 +24,52 @@ const GatePassForm = () => {
     return diff > 0 ? diff : 0;
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.depart_Name) {
+      alert("Please enter your department.");
+      return;
+    }
+
     const daysRequested = calculateDaysRequested();
 
     const payload = {
       ...formData,
       daysRequested,
-      status: 'pending',
+      status: "pending",
     };
-    
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v2/apply`,payload,{
-        headers:{
-          'Authorization':`Bearer ${localStorage.getItem('token')}`,
-          'Content-Type':'application/json'
-        }
-      })
 
-      if (res.status==201) {
-        alert('Gate pass request submitted successfully!');
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/v2/apply`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (res.status === 201) {
+        alert("Gate pass request submitted successfully!");
         setFormData({
-          reason: '',
-          formDate: '',
-          toDate: '',
-          workingDays: 'yes',
-          location: '',
-          fatherContactNo: '',
+          reason: "",
+          formDate: "",
+          toDate: "",
+          workingDays: "yes",
+          location: "",
+          fatherContactNo: "",
+          depart_Name: "",
         });
-      } 
-      else {
-        alert('Failed to submit. Please try again.');
+      } else {
+        alert("Failed to submit. Please try again.");
       }
     } catch (error) {
       console.error(error);
+      alert(error.response?.data?.message || "An error occurred.");
     }
   };
 
@@ -136,6 +148,19 @@ const GatePassForm = () => {
             <option value="yes">Yes</option>
             <option value="no">No</option>
           </select>
+        </div>
+
+        <div>
+          <label className="block font-medium text-gray-700">Department</label>
+          <input
+            type="text"
+            name="depart_Name"
+            value={formData.depart_Name}
+            onChange={handleChange}
+            placeholder="Enter your department"
+            required
+            className="w-full border rounded px-3 py-2"
+          />
         </div>
 
         <button
