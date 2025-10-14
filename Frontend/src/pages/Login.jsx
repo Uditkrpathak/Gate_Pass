@@ -54,13 +54,13 @@ const Login = () => {
           if(form.role === 'student'){
             navigate('/student')
           }
-          if(form.role === 'hod'){
+          if(form.role === 'Hod'){
             navigate('/hod')
           }
-          if(form.role === 'admin'){
+          if(form.role === 'Admin'){
             navigate('/admin')
           }
-          if(form.role === 'warden'){
+          if(form.role === 'Warden'){
             navigate('/warden')
           }
         toast.success("Login successful!", { theme: "colored" });
