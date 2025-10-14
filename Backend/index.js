@@ -3,9 +3,11 @@ import express from "express";
 import dotenv from "dotenv";
 import database from "./utils/database.js";
 import Userrouter from "./route/User.route.js";
-import GateApply from "./route/gate.route.js";
+
 import cookieParser from "cookie-parser";
 import cors from "cors"
+import departmentRouter from "./route/department.route.js";
+import GateApply from "./route/gate.route.js";
 
 dotenv.config();
 
@@ -25,9 +27,14 @@ app.use(
 
 app.use(cookieParser())
 
+app.get('/',(req,res)=>{
+    res.json({messag:"Api is working"});
+})
+
 
 app.use("/api/v1",Userrouter);
 app.use("/api/v2",GateApply)
+app.use("/api/v3",departmentRouter)
 
 database();
 
